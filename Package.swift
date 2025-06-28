@@ -5,20 +5,47 @@ import PackageDescription
 
 let package = Package(
     name: "CHAuth",
+    platforms: [
+        .iOS(.v15),
+        .macOS(.v12),
+        .watchOS(.v8),
+        .tvOS(.v15)
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "CHAuth",
             targets: ["CHAuth"]),
+        .library(
+            name: "CHAuthSupabase",
+            targets: ["CHAuthSupabase"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/openid/AppAuth-iOS.git", from: "1.7.5"),
+        .package(url: "https://github.com/supabase/supabase-swift.git", from: "2.12.0"),
+        .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "4.2.2"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "CHAuth"),
+            name: "CHAuth",
+            dependencies: [
+                .product(name: "AppAuth", package: "AppAuth-iOS"),
+                .product(name: "KeychainAccess", package: "KeychainAccess"),
+            ]
+        ),
+        .target(
+            name: "CHAuthSupabase",
+            dependencies: [
+                "CHAuth",
+                .product(name: "Supabase", package: "supabase-swift"),
+            ]
+        ),
         .testTarget(
             name: "CHAuthTests",
             dependencies: ["CHAuth"]
+        ),
+        .testTarget(
+            name: "CHAuthSupabaseTests",
+            dependencies: ["CHAuthSupabase"]
         ),
     ]
 )
