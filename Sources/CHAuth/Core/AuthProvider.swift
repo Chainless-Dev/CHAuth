@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 public protocol AuthProvider: Sendable {
     var providerType: AuthProviderType { get }
     var redirectScheme: String? { get }

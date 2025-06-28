@@ -16,20 +16,20 @@ public final class AuthURLHandler: @unchecked Sendable {
         }
     }
     
-    public func handleURL(_ url: URL) -> Bool {
-        return queue.sync {
-            guard let scheme = url.scheme else { return false }
-            
-            guard let provider = pendingProviders[scheme] else { return false }
-            
-            do {
-                let _ = try provider.handleCallback(url: url)
-                clearPendingProvider(for: scheme)
-                return true
-            } catch {
-                clearPendingProvider(for: scheme)
-                return false
-            }
+    public func handleURL(_ url: URL) async -> Bool {
+        guard let scheme = url.scheme else { return false }
+        
+        let provider = queue.sync { pendingProviders[scheme] }
+        guard let provider = provider else { return false }
+        
+        defer { clearPendingProvider(for: scheme) }
+        
+        // Handle the callback with the MainActor provider
+        do {
+            let _ = try await provider.handleCallback(url: url)
+            return true
+        } catch {
+            return false
         }
     }
     

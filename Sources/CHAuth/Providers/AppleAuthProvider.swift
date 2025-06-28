@@ -1,7 +1,13 @@
 import Foundation
 import AuthenticationServices
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
-public final class AppleAuthProvider: NSObject, AuthProvider, @unchecked Sendable {
+@MainActor
+public final class AppleAuthProvider: NSObject, AuthProvider {
     public let providerType: AuthProviderType = .apple
     public let redirectScheme: String? = nil
     public let requiredScopes: [String] = []
@@ -108,7 +114,21 @@ extension AppleAuthProvider: ASAuthorizationControllerDelegate {
 extension AppleAuthProvider: ASAuthorizationControllerPresentationContextProviding {
     public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         #if os(iOS)
-        return UIApplication.shared.windows.first { $0.isKeyWindow } ?? UIWindow()
+        // Get the first active window scene and its key window
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }) else {
+            // Fallback: create a new window if no active scene
+            return UIWindow()
+        }
+        
+        // Get the key window from the active scene
+        guard let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }) else {
+            // Fallback: get any window from the scene or create new one
+            return windowScene.windows.first ?? UIWindow()
+        }
+        
+        return keyWindow
         #elseif os(macOS)
         return NSApplication.shared.windows.first ?? NSWindow()
         #else

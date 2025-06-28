@@ -24,6 +24,7 @@ public final class DefaultAuthCoordinator: AuthCoordinator {
         }
         
         do {
+            // Since provider is MainActor, we need to call it from MainActor context
             let providerResult = try await provider.authenticate()
             let serviceResponse = try await authService.signIn(with: providerResult)
             
@@ -89,11 +90,11 @@ public final class DefaultAuthCoordinator: AuthCoordinator {
         }
     }
     
-    public func handleProviderCallback(url: URL) -> Bool {
+    public func handleProviderCallback(url: URL) async -> Bool {
         // Try each provider to handle the callback
         for provider in providers.values {
             do {
-                if let _ = try provider.handleCallback(url: url) {
+                if let _ = try await provider.handleCallback(url: url) {
                     return true
                 }
             } catch {

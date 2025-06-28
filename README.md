@@ -65,7 +65,9 @@ struct MyApp: App {
             ContentView()
                 .environmentObject(AuthManager.shared)
                 .onOpenURL { url in
-                    _ = AuthURLHandler.shared.handleURL(url)
+                    Task {
+                        _ = await AuthURLHandler.shared.handleURL(url)
+                    }
                 }
         }
     }
@@ -194,6 +196,22 @@ CHAuth follows a clean, protocol-oriented architecture:
 - iOS 15.0+ / macOS 12.0+ / watchOS 8.0+ / tvOS 15.0+
 - Swift 6.0+
 - Xcode 16.0+
+
+## Platform Support
+
+CHAuth is fully compatible with:
+- ✅ **iOS 15.0+** - Full support with modern window scene APIs
+- ✅ **macOS 12.0+** - Full support with AppKit integration
+- ✅ **watchOS 8.0+** - Core authentication without UI components
+- ✅ **tvOS 15.0+** - Core authentication without OAuth flows
+
+### iOS-Specific Features
+- Modern window scene support for iOS 15+
+- Proper presentation context handling for OAuth flows
+- SwiftUI integration with native iOS components
+- URL scheme handling for OAuth callbacks
+
+For detailed iOS integration instructions, see [Examples/iOS-Integration.md](Examples/iOS-Integration.md).
 
 ## License
 

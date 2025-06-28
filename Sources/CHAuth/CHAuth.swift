@@ -41,7 +41,7 @@ public typealias CHAuthView = AuthView
 public typealias CHUserProfileView = UserProfileView
 
 // MARK: - Configuration
-public struct CHAuthConfiguration {
+public struct CHAuthConfiguration: @unchecked Sendable {
     public let service: AuthService
     public let providers: [AuthProvider]
     public let sessionManager: SessionManager?
@@ -63,7 +63,7 @@ public struct CHAuthConfiguration {
     }
 }
 
-public struct CHAuthOptions {
+public struct CHAuthOptions: Sendable {
     public let automaticTokenRefresh: Bool
     public let sessionPersistence: Bool
     public let biometricProtection: Bool

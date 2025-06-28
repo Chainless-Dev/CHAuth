@@ -1,7 +1,13 @@
 import Foundation
 import AppAuth
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
-public final class GoogleAuthProvider: NSObject, AuthProvider, @unchecked Sendable {
+@MainActor
+public final class GoogleAuthProvider: NSObject, AuthProvider {
     public let providerType: AuthProviderType = .google
     public let redirectScheme: String?
     public let requiredScopes: [String]
@@ -55,7 +61,12 @@ public final class GoogleAuthProvider: NSObject, AuthProvider, @unchecked Sendab
                 )
                 
                 #if os(iOS)
-                guard let presentingViewController = UIApplication.shared.windows.first?.rootViewController else {
+                // Get the root view controller from the active window scene
+                guard let windowScene = UIApplication.shared.connectedScenes
+                    .compactMap({ $0 as? UIWindowScene })
+                    .first(where: { $0.activationState == .foregroundActive }),
+                      let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+                      let presentingViewController = keyWindow.rootViewController else {
                     continuation.resume(throwing: AuthError.configurationError("No presenting view controller available"))
                     return
                 }

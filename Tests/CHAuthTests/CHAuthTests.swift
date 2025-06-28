@@ -128,13 +128,15 @@ func testAuthTokens() async throws {
 @Test("CHAuthConfiguration creation")
 func testCHAuthConfiguration() async throws {
     let mockService = MockAuthService()
-    let mockProvider = MockAuthProvider()
     
-    let config = CHAuthConfiguration(
-        service: mockService,
-        providers: [mockProvider],
-        options: CHAuthOptions(automaticTokenRefresh: false)
-    )
+    let config = await MainActor.run {
+        let mockProvider = MockAuthProvider()
+        return CHAuthConfiguration(
+            service: mockService,
+            providers: [mockProvider],
+            options: CHAuthOptions(automaticTokenRefresh: false)
+        )
+    }
     
     #expect(config.providers.count == 1)
     #expect(config.options.automaticTokenRefresh == false)
@@ -184,7 +186,8 @@ final class MockAuthService: AuthService, @unchecked Sendable {
     }
 }
 
-final class MockAuthProvider: AuthProvider, @unchecked Sendable {
+@MainActor
+final class MockAuthProvider: AuthProvider {
     let providerType: AuthProviderType = .apple
     let redirectScheme: String? = nil
     let requiredScopes: [String] = []
