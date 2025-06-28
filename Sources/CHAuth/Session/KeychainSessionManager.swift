@@ -12,7 +12,7 @@ public final class KeychainSessionManager: SessionManager {
         static let tokenType = "auth.token_type"
     }
     
-    public init(authService: AuthService, service: String = "CHAuth") {
+    public init(authService: AuthService, service: String = "com.chainless.CHAuth") {
         self.authService = authService
         self.keychain = Keychain(service: service)
             .accessibility(.afterFirstUnlockThisDeviceOnly)
