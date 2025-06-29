@@ -1,5 +1,5 @@
 {
-  "originHash" : "6e0aee5f22b5e247c60024c939b1b6b3fe95e36a9311032db86621a631c9c136",
+  "originHash" : "128ef2f3e3437ffeda84498b70f23d9fa0e7c24d1622127259361a5cc74485d1",
   "pins" : [
     {
       "identity" : "appauth-ios",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "2781038865a80e2c425a1da12cc1327bcd56501f",
         "version" : "1.7.6"
+      }
+    },
+    {
+      "identity" : "chlogger",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AlikhanMussabekov/CHLogger.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "79b4fd7a1234af2d302b68f4e017e239cb7f11a5"
       }
     },
     {

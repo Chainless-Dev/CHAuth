@@ -1,6 +1,7 @@
 import Foundation
 import Supabase
 import CHAuth
+import CHLogger
 
 public final class SupabaseAuthService: AuthService, @unchecked Sendable {
     private let supabase: SupabaseClient
@@ -10,12 +11,16 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
     }
     
     public func signIn(with result: ProviderAuthResult) async throws -> CHAuth.AuthResponse {
+        log.info("SupabaseService: Starting sign in with provider \(result.provider.rawValue)")
+        
         do {
             let session: Session
             
             switch result.provider {
             case .apple:
+                log.debug("SupabaseService: Signing in with Apple ID token")
                 guard let idToken = result.idToken else {
+                    log.error("SupabaseService: Missing ID token for Apple sign in")
                     throw AuthError.providerError(.apple, NSError(domain: "SupabaseAuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing ID token"]))
                 }
                 
@@ -27,7 +32,9 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
                 )
                 
             case .google:
+                log.debug("SupabaseService: Signing in with Google ID token")
                 guard let idToken = result.idToken else {
+                    log.error("SupabaseService: Missing ID token for Google sign in")
                     throw AuthError.providerError(.google, NSError(domain: "SupabaseAuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing ID token"]))
                 }
                 
@@ -40,11 +47,13 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
                 )
                 
             case .github:
+                log.warning("SupabaseService: GitHub OAuth not implemented")
                 // GitHub OAuth not directly supported by Supabase OpenIDConnect
                 // This would need custom implementation or different auth method
                 throw AuthError.providerError(.github, NSError(domain: "SupabaseAuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "GitHub OAuth not implemented"]))
             }
             
+            log.debug("SupabaseService: Creating service user from session")
             let serviceUser = ServiceUser(
                 id: session.user.id.uuidString,
                 email: session.user.email,
@@ -59,6 +68,7 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
                 lastSignInAt: session.user.lastSignInAt ?? Date()
             )
             
+            log.info("SupabaseService: Sign in successful for user \\(serviceUser.id)")
             return CHAuth.AuthResponse(
                 accessToken: session.accessToken,
                 refreshToken: session.refreshToken,
@@ -68,22 +78,30 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
             )
             
         } catch {
+            log.error("SupabaseService: Sign in failed: \\(error.localizedDescription)")
             throw AuthError.serviceError(error)
         }
     }
     
     public func signOut(token: String) async throws {
+        log.info("SupabaseService: Starting sign out")
+        
         do {
             try await supabase.auth.signOut()
+            log.info("SupabaseService: Sign out successful")
         } catch {
+            log.error("SupabaseService: Sign out failed: \(error.localizedDescription)")
             throw AuthError.serviceError(error)
         }
     }
     
     public func refreshSession(refreshToken: String) async throws -> CHAuth.AuthResponse {
+        log.info("SupabaseService: Starting session refresh")
+        
         do {
             let session = try await supabase.auth.refreshSession(refreshToken: refreshToken)
             
+            log.debug("SupabaseService: Creating service user from refreshed session")
             let serviceUser = ServiceUser(
                 id: session.user.id.uuidString,
                 email: session.user.email,
@@ -98,6 +116,7 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
                 lastSignInAt: session.user.lastSignInAt ?? Date()
             )
             
+            log.info("SupabaseService: Session refresh successful for user \(serviceUser.id)")
             return CHAuth.AuthResponse(
                 accessToken: session.accessToken,
                 refreshToken: session.refreshToken,
@@ -107,15 +126,19 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
             )
             
         } catch {
+            log.error("SupabaseService: Session refresh failed: \(error.localizedDescription)")
             throw AuthError.serviceError(error)
         }
     }
     
     public func getUserProfile(accessToken: String) async throws -> CHAuth.User {
+        log.info("SupabaseService: Getting user profile")
+        
         do {
             let user = try await supabase.auth.user()
             
-            return CHAuth.User(
+            log.debug("SupabaseService: Creating CHAuth user from Supabase user")
+            let chAuthUser = CHAuth.User(
                 id: user.id.uuidString,
                 email: user.email,
                 fullName: user.userMetadata["full_name"]?.value as? String,
@@ -132,12 +155,17 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
                 lastSignInAt: user.lastSignInAt ?? Date()
             )
             
+            log.info("SupabaseService: User profile retrieved successfully for user \\(chAuthUser.id)")
+            return chAuthUser
+            
         } catch {
+            log.error("SupabaseService: Failed to get user profile: \\(error.localizedDescription)")
             throw AuthError.serviceError(error)
         }
     }
     
     public func deleteAccount(accessToken: String) async throws {
+        log.warning("SupabaseService: Account deletion attempted but not implemented")
         // Supabase doesn't have a direct delete account method in the auth API
         // This would typically require a custom RPC call or edge function
         throw AuthError.serviceError(NSError(domain: "SupabaseAuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Account deletion not implemented"]))

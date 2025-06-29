@@ -1,5 +1,6 @@
 import Foundation
 import AppAuth
+import CHLogger
 #if os(iOS)
 import UIKit
 #elseif os(macOS)
@@ -29,12 +30,16 @@ public final class GoogleAuthProvider: NSObject, AuthProvider {
     }
     
     public func authenticate() async throws -> ProviderAuthResult {
+        log.info("GoogleProvider: Starting Google authentication")
+        
         return try await withCheckedThrowingContinuation { continuation in
             guard let issuerURL = URL(string: issuer) else {
+                log.error("GoogleProvider: Invalid issuer URL: \(issuer)")
                 continuation.resume(throwing: AuthError.configurationError("Invalid issuer URL"))
                 return
             }
             
+            log.debug("GoogleProvider: Discovering OAuth configuration for issuer: \(issuer)")
             OIDAuthorizationService.discoverConfiguration(forIssuer: issuerURL) { [weak self] configuration, error in
                 guard let self = self else {
                     continuation.resume(throwing: AuthError.unknown(NSError(domain: "GoogleAuthProvider", code: -1, userInfo: [NSLocalizedDescriptionKey: "Provider deallocated"])))
@@ -42,15 +47,18 @@ public final class GoogleAuthProvider: NSObject, AuthProvider {
                 }
                 
                 if let error = error {
+                    log.error("GoogleProvider: Configuration discovery failed: \(error.localizedDescription)")
                     continuation.resume(throwing: AuthError.providerError(.google, error))
                     return
                 }
                 
                 guard let configuration = configuration else {
+                    log.error("GoogleProvider: Failed to discover OAuth configuration")
                     continuation.resume(throwing: AuthError.configurationError("Failed to discover OAuth configuration"))
                     return
                 }
                 
+                log.debug("GoogleProvider: Creating authorization request with scopes: \(self.requiredScopes.joined(separator: ", "))")
                 let request = OIDAuthorizationRequest(
                     configuration: configuration,
                     clientId: self.clientID,
@@ -67,14 +75,17 @@ public final class GoogleAuthProvider: NSObject, AuthProvider {
                     .first(where: { $0.activationState == .foregroundActive }),
                       let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
                       let presentingViewController = keyWindow.rootViewController else {
+                    log.error("GoogleProvider: No presenting view controller available")
                     continuation.resume(throwing: AuthError.configurationError("No presenting view controller available"))
                     return
                 }
                 
+                log.debug("GoogleProvider: Presenting authorization request")
                 self.currentAuthSession = OIDAuthState.authState(byPresenting: request, presenting: presentingViewController) { authState, error in
                     self.handleAuthResult(authState: authState, error: error, continuation: continuation)
                 }
                 #elseif os(macOS)
+                log.debug("GoogleProvider: Presenting authorization request (macOS)")
                 self.currentAuthSession = OIDAuthState.authState(byPresenting: request) { authState, error in
                     self.handleAuthResult(authState: authState, error: error, continuation: continuation)
                 }
@@ -89,19 +100,23 @@ public final class GoogleAuthProvider: NSObject, AuthProvider {
         continuation: CheckedContinuation<ProviderAuthResult, Error>
     ) {
         if let error = error {
+            log.error("GoogleProvider: Authentication failed: \(error.localizedDescription)")
             continuation.resume(throwing: AuthError.providerError(.google, error))
             return
         }
         
         guard let authState = authState,
               let accessToken = authState.lastTokenResponse?.accessToken else {
+            log.error("GoogleProvider: Failed to get access token from auth state")
             continuation.resume(throwing: AuthError.providerError(.google, NSError(domain: "GoogleAuthProvider", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to get access token"])))
             return
         }
         
+        log.debug("GoogleProvider: Processing authentication result")
         var userInfo: [String: AnySendableValue] = [:]
         
         if let idToken = authState.lastTokenResponse?.idToken {
+            log.debug("GoogleProvider: ID token received, parsing user info")
             userInfo["id_token"] = AnySendableValue(idToken)
             
             // Parse ID token for user info (simplified - in production use a proper JWT library)
@@ -109,6 +124,7 @@ public final class GoogleAuthProvider: NSObject, AuthProvider {
                 for (key, value) in payload {
                     userInfo[key] = AnySendableValue(value)
                 }
+                log.debug("GoogleProvider: Parsed user info from ID token")
             }
         }
         
@@ -122,19 +138,28 @@ public final class GoogleAuthProvider: NSObject, AuthProvider {
             provider: .google
         )
         
+        log.info("GoogleProvider: Authentication successful")
         continuation.resume(returning: result)
     }
     
     public func handleCallback(url: URL) throws -> ProviderAuthResult? {
+        log.debug("GoogleProvider: Handling callback URL: \(url.absoluteString)")
+        
         if currentAuthSession?.resumeExternalUserAgentFlow(with: url) == true {
+            log.debug("GoogleProvider: Callback handled by external user agent flow")
             return nil // Will be handled by the completion handler
         }
+        
+        log.debug("GoogleProvider: Callback not handled by current session")
         return nil
     }
     
     public func refreshToken(_ refreshToken: String) async throws -> ProviderAuthResult {
+        log.info("GoogleProvider: Starting token refresh")
+        
         return try await withCheckedThrowingContinuation { continuation in
             guard let issuerURL = URL(string: issuer) else {
+                log.error("GoogleProvider: Invalid issuer URL for refresh: \(issuer)")
                 continuation.resume(throwing: AuthError.configurationError("Invalid issuer URL"))
                 return
             }
@@ -209,7 +234,9 @@ public final class GoogleAuthProvider: NSObject, AuthProvider {
     }
     
     public func signOut() async throws {
+        log.info("GoogleProvider: Signing out")
         currentAuthSession = nil
+        log.debug("GoogleProvider: Sign out completed")
     }
     
     private func parseJWTPayload(_ jwt: String) -> [String: Any]? {
