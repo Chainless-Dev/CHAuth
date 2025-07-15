@@ -86,11 +86,9 @@ func testAuthErrorDescriptions() async throws {
 func testAuthProviderType() async throws {
     #expect(AuthProviderType.apple.displayName == "Apple")
     #expect(AuthProviderType.google.displayName == "Google")
-    #expect(AuthProviderType.github.displayName == "GitHub")
     
     #expect(AuthProviderType.apple.rawValue == "apple")
     #expect(AuthProviderType.google.rawValue == "google")
-    #expect(AuthProviderType.github.rawValue == "github")
 }
 
 @Test("ProviderAuthResult creation")

@@ -32,6 +32,9 @@ let package = Package(
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
                 .product(name: "KeychainAccess", package: "KeychainAccess"),
                 .product(name: "CHLogger", package: "CHLogger"),
+            ],
+            resources: [
+                .process("Assets.xcassets")
             ]
         ),
         .target(

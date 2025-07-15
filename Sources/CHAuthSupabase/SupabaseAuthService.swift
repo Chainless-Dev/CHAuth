@@ -45,12 +45,6 @@ public final class SupabaseAuthService: AuthService, @unchecked Sendable {
                         accessToken: result.accessToken
                     )
                 )
-                
-            case .github:
-                log.warning("SupabaseService: GitHub OAuth not implemented")
-                // GitHub OAuth not directly supported by Supabase OpenIDConnect
-                // This would need custom implementation or different auth method
-                throw AuthError.providerError(.github, NSError(domain: "SupabaseAuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "GitHub OAuth not implemented"]))
             }
             
             log.debug("SupabaseService: Creating service user from session")

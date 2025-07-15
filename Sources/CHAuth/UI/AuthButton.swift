@@ -12,11 +12,15 @@ public struct AuthButton: View {
     public var body: some View {
         Button(action: action) {
             HStack {
-                Image(systemName: provider.systemImageName)
+                Spacer()
+
+                Image(provider.icon)
+                    .resizable()
                     .foregroundColor(provider.iconColor)
-                
-                Text("Continue with \(provider.displayName)")
-                    .font(.system(size: 16, weight: .medium))
+                    .frame(width: 20, height: 20)
+
+                Text("Continue With \(provider.displayName)")
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(provider.textColor)
                 
                 Spacer()
@@ -24,9 +28,9 @@ public struct AuthButton: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(provider.backgroundColor)
-            .cornerRadius(8)
+            .cornerRadius(12)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 12)
                     .stroke(provider.borderColor, lineWidth: 1)
             )
         }
@@ -35,47 +39,39 @@ public struct AuthButton: View {
 }
 
 extension AuthProviderType {
-    var systemImageName: String {
+    var icon: ImageResource {
         switch self {
         case .apple:
-            return "applelogo"
+            return ImageResource(name: "apple_logo_32", bundle: .module)
         case .google:
-            return "globe"
-        case .github:
-            return "chevron.left.forwardslash.chevron.right"
+            return ImageResource(name: "google_logo_32", bundle: .module)
         }
     }
     
     var backgroundColor: Color {
         switch self {
         case .apple:
-            return Color.black
+            return Color(light: .black, dark: .white)
         case .google:
-            return Color.white
-        case .github:
-            return Color.black
+            return .white
         }
     }
     
     var textColor: Color {
         switch self {
         case .apple:
-            return Color.white
+            return Color(light: .white, dark: .black)
         case .google:
-            return Color.black
-        case .github:
-            return Color.white
+            return .black
         }
     }
     
     var iconColor: Color {
         switch self {
         case .apple:
-            return Color.white
+            return Color(light: .white, dark: .black)
         case .google:
-            return Color.blue
-        case .github:
-            return Color.white
+            return Color.clear
         }
     }
     
@@ -85,8 +81,16 @@ extension AuthProviderType {
             return Color.clear
         case .google:
             return Color.gray.opacity(0.3)
-        case .github:
-            return Color.clear
         }
     }
+}
+
+#Preview {
+    AuthButton(provider: .apple) {
+    }
+    .padding()
+
+    AuthButton(provider: .google) {
+    }
+    .padding()
 }

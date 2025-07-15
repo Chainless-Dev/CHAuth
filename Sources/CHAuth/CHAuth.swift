@@ -3,43 +3,6 @@
 
 import Foundation
 
-// Re-export all public types
-public typealias CHUser = User
-public typealias CHAuthState = AuthState
-public typealias CHAuthError = AuthError
-public typealias CHAuthProviderType = AuthProviderType
-public typealias CHProviderAuthResult = ProviderAuthResult
-public typealias CHAuthResponse = AuthResponse
-public typealias CHServiceUser = ServiceUser
-public typealias CHAuthTokens = AuthTokens
-
-// Re-export protocols
-public typealias CHAuthProvider = AuthProvider
-public typealias CHAuthService = AuthService
-public typealias CHSessionManager = SessionManager
-public typealias CHAuthCoordinator = AuthCoordinator
-public typealias CHUserProfileStandardizer = UserProfileStandardizer
-
-// Re-export manager
-public typealias CHAuthManager = AuthManager
-
-// Re-export implementations
-public typealias CHDefaultAuthCoordinator = DefaultAuthCoordinator
-public typealias CHDefaultUserProfileStandardizer = DefaultUserProfileStandardizer
-public typealias CHKeychainSessionManager = KeychainSessionManager
-
-// Re-export providers
-public typealias CHAppleAuthProvider = AppleAuthProvider
-public typealias CHGoogleAuthProvider = GoogleAuthProvider
-
-// Re-export utilities
-public typealias CHAuthURLHandler = AuthURLHandler
-
-// Re-export UI components
-public typealias CHAuthButton = AuthButton
-public typealias CHAuthView = AuthView
-public typealias CHUserProfileView = UserProfileView
-
 // MARK: - Configuration
 public struct CHAuthConfiguration: @unchecked Sendable {
     public let service: AuthService

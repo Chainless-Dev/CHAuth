@@ -52,10 +52,6 @@ public final class DefaultUserProfileStandardizer: UserProfileStandardizer {
             givenName = userInfo["given_name"]?.stringValue
             familyName = userInfo["family_name"]?.stringValue
             fullName = userInfo["name"]?.stringValue
-            
-        case .github:
-            fullName = userInfo["name"]?.stringValue
-            // GitHub doesn't separate first/last names by default
         }
         
         // Fallback to service user data
