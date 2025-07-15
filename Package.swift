@@ -20,7 +20,7 @@ let package = Package(
             targets: ["CHAuthSupabase"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/openid/AppAuth-iOS.git", from: "1.7.5"),
+        .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "9.0.0"),
         .package(url: "https://github.com/supabase/supabase-swift.git", from: "2.12.0"),
         .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "4.2.2"),
         .package(url: "https://github.com/AlikhanMussabekov/CHLogger.git", branch: "main"),
@@ -29,7 +29,7 @@ let package = Package(
         .target(
             name: "CHAuth",
             dependencies: [
-                .product(name: "AppAuth", package: "AppAuth-iOS"),
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
                 .product(name: "KeychainAccess", package: "KeychainAccess"),
                 .product(name: "CHLogger", package: "CHLogger"),
             ]
