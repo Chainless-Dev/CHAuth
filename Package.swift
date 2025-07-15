@@ -21,7 +21,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "9.0.0"),
-        .package(url: "https://github.com/supabase/supabase-swift.git", from: "2.12.0"),
+        .package(url: "https://github.com/supabase/supabase-swift.git", from: "2.30.1"),
         .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "4.2.2"),
         .package(url: "https://github.com/AlikhanMussabekov/CHLogger.git", branch: "main"),
     ],
