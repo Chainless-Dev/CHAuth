@@ -1,5 +1,5 @@
 {
-  "originHash" : "4b493096fb51db71b95b6ce4b142d102be217c80921279e585b3f7d50db7633d",
+  "originHash" : "0fe37295f409db58445cd2afe0049d3c60445290045eec447b55ebc23d26ffd6",
   "pins" : [
     {
       "identity" : "app-check",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AlikhanMussabekov/CHLogger.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "79b4fd7a1234af2d302b68f4e017e239cb7f11a5"
+        "revision" : "79b4fd7a1234af2d302b68f4e017e239cb7f11a5",
+        "version" : "1.0.0"
       }
     },
     {
