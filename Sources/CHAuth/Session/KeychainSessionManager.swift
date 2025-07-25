@@ -101,6 +101,20 @@ public final class KeychainSessionManager: SessionManager {
         if let expiresAt = await tokenExpiresAt {
             let isValid = expiresAt > Date().addingTimeInterval(60) // 1 minute buffer
             log.debug("SessionManager: Token expires at \(expiresAt), valid: \(isValid)")
+            
+            // If token is expired, attempt silent refresh
+            if !isValid {
+                log.info("SessionManager: Token expired, attempting silent refresh")
+                do {
+                    _ = try await refreshTokens()
+                    log.info("SessionManager: Silent refresh successful")
+                    return true
+                } catch {
+                    log.error("SessionManager: Silent refresh failed: \(error.localizedDescription)")
+                    return false
+                }
+            }
+            
             return isValid
         }
         
